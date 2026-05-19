@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, jsonify
 import random
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
 app = Flask(__name__)
 
 # TRAINING DATA
