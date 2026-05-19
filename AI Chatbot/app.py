@@ -97,7 +97,7 @@ intents = {
         ],
 
         "responses": [
-            "You can contact us at support@shop.com or call +91 9876543210."
+            "You can contact us at support@shop.com or call +91 98765432."
         ]
     }
 }
