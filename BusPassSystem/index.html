@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Pass System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #f3f4f6; min-height: 100vh; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .page { display: none; }
+        .page.active { display: block; }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+        
+        <div id="page1" class="page active">
+            <div class="flex justify-center space-x-2 mb-6 bg-gray-100 p-1 rounded-xl">
+                <button id="tab-login" onclick="switchAuthTab('login')" class="w-1/2 py-2 text-sm font-semibold rounded-lg bg-gray-900 text-white transition-all cursor-pointer">Login</button>
+                <button id="tab-signup" onclick="switchAuthTab('signup')" class="w-1/2 py-2 text-sm font-semibold rounded-lg text-gray-600 hover:text-gray-900 transition-all cursor-pointer">Sign Up</button>
+            </div>
+
+            <form id="login-form" onsubmit="handleAuth(event)" class="space-y-4">
+                <h2 class="text-2xl font-bold text-gray-900">Welcome Back</h2>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Gmail</label>
+                    <input type="email" required placeholder="example@gmail.com" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-gray-900 outline-none text-gray-900">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Password</label>
+                    <input type="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-gray-900 outline-none text-gray-900">
+                </div>
+                <button type="submit" class="w-full py-3 mt-4 bg-gray-900 text-white font-semibold rounded-xl shadow-md hover:bg-gray-800 cursor-pointer">Log In</button>
+            </form>
+
+            <form id="signup-form" onsubmit="handleAuth(event)" class="space-y-4 hidden">
+                <h2 class="text-2xl font-bold text-gray-900">Create Account</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" placeholder="First Name" required class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-gray-900 outline-none">
+                    <input type="text" placeholder="Last Name" required class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-gray-900 outline-none">
+                </div>
+                <input type="email" placeholder="Gmail" required class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 outline-none">
+                <input type="password" placeholder="Password" required class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 outline-none">
+                <button type="submit" class="w-full py-3 mt-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 cursor-pointer">Sign Up</button>
+            </form>
+        </div>
+
+        <div id="page2" class="page">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Plan Your Journey</h2>
+            <form onsubmit="handleJourneyDetails(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">From</label>
+                        <select id="from-dest" onchange="calculateFare()" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">To</label>
+                        <select id="to-dest" onchange="calculateFare()" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900"></select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Date</label>
+                        <input type="date" id="journey-date" required class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Tickets</label>
+                        <input type="number" id="ticket-count" min="1" max="10" value="1" oninput="calculateFare()" required class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200">
+                    </div>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 flex justify-between items-center">
+                    <span class="text-gray-600 font-medium">Total Fare:</span>
+                    <span id="price-display" class="text-lg font-bold text-gray-900">₹0</span>
+                </div>
+                <button type="submit" class="w-full py-3 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 cursor-pointer">Next ➡️</button>
+            </form>
+        </div>
+
+        <div id="page3" class="page">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Passenger Details</h2>
+            <form onsubmit="handlePassengerDetails(event)">
+                <div id="passenger-inputs-container" class="space-y-4 max-h-[380px] overflow-y-auto mb-6"></div>
+                <button type="submit" id="book-btn" class="w-full py-3 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 cursor-pointer">Book Tickets 🎫</button>
+            </form>
+        </div>
+
+        <div id="page4" class="page">
+            <h2 class="text-2xl font-bold text-center text-gray-900 mb-6">Booking Confirmed!</h2>
+            <div id="tickets-container" class="space-y-4"></div>
+            <button onclick="restartBooking()" class="w-full py-3 mt-6 bg-gray-100 text-gray-900 font-semibold rounded-xl border border-gray-300 cursor-pointer">Book Another</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // REPLACE WITH YOUR FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyD94FSioJhNwgv06W-_0oNzGgiARgRol_c",
+            authDomain: "busspasssystem-fbe84.firebaseapp.com",
+            projectId: "busspasssystem-fbe84",
+            storageBucket: "busspasssystem-fbe84.firebasestorage.app",
+            messagingSenderId: "926962105999",
+            appId: "1:926962105999:web:bf0a2ef519846470823afa"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // South India Location Data (Rough KM relative coordinates for price logic)
+        const locationNetwork = {
+            "Bangalore": { x: 0, y: 0 },
+            "Chennai": { x: 350, y: 20 },
+            "Hyderabad": { x: 100, y: 570 },
+            "Kochi": { x: -150, y: -500 },
+            "Vijayawada": { x: 380, y: 450 },
+            "Mysore": { x: -140, y: -20 }
+        };
+
+        let journeyData = {};
+        let estimatedTotalCost = 0;
+
+        window.calculateFare = function() {
+            const from = document.getElementById('from-dest').value;
+            const to = document.getElementById('to-dest').value;
+            const qty = parseInt(document.getElementById('ticket-count').value) || 1;
+            const display = document.getElementById('price-display');
+
+            if (from === to) {
+                display.textContent = "Invalid Route";
+                return false;
+            }
+
+            const p1 = locationNetwork[from];
+            const p2 = locationNetwork[to];
+            const distance = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+            
+            // Rate: ₹2.5 per KM
+            estimatedTotalCost = Math.round(distance * 2.5 * qty);
+            display.textContent = `₹${estimatedTotalCost}`;
+            return true;
+        }
+
+        window.handleJourneyDetails = function(event) {
+            event.preventDefault();
+            if (!calculateFare()) return alert("Origin and Destination cannot be the same.");
+
+            journeyData = {
+                from: document.getElementById('from-dest').value,
+                to: document.getElementById('to-dest').value,
+                date: document.getElementById('journey-date').value,
+                count: parseInt(document.getElementById('ticket-count').value)
+            };
+
+            const container = document.getElementById('passenger-inputs-container');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= journeyData.count; i++) {
+                const item = document.createElement('div');
+                item.className = "p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3";
+                item.innerHTML = `
+                    <p class="font-bold text-gray-900">Passenger ${i}</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="text" placeholder="Full Name" required class="p-name col-span-2 px-3 py-2 rounded-lg border border-gray-200 text-sm">
+                        <input type="number" placeholder="Age" required class="p-age px-3 py-2 rounded-lg border border-gray-200 text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select class="p-gender px-3 py-2 rounded-lg border border-gray-200 text-sm">
+                            <option>Male</option><option>Female</option>
+                        </select>
+                        <input type="tel" placeholder="Phone" required class="p-phone px-3 py-2 rounded-lg border border-gray-200 text-sm">
+                    </div>`;
+                container.appendChild(item);
+            }
+            navigateTo('page3');
+        }
+
+        window.handlePassengerDetails = async function(event) {
+            event.preventDefault();
+            const btn = document.getElementById('book-btn');
+            btn.disabled = true;
+            btn.textContent = "Checking Bus Availability...";
+
+            const passengers = Array.from(document.querySelectorAll('.p-name')).map((el, i) => ({
+                name: el.value,
+                age: document.querySelectorAll('.p-age')[i].value,
+                gender: document.querySelectorAll('.p-gender')[i].value,
+                phone: document.querySelectorAll('.p-phone')[i].value
+            }));
+
+            try {
+                // Check Firestore for 24-seat capacity logic
+                const busNo = await determineAvailableBus(journeyData.from, journeyData.to, journeyData.date, journeyData.count);
+                
+                const booking = {
+                    from: journeyData.from,
+                    to: journeyData.to,
+                    date: journeyData.date,
+                    busNo: busNo,
+                    totalCost: estimatedTotalCost,
+                    passengers: passengers
+                };
+
+                await addDoc(collection(db, "bookings"), booking);
+                renderTickets(booking);
+                navigateTo('page4');
+            } catch (e) {
+                alert("Database Error. Please check Firebase configuration.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Book Tickets 🎫";
+            }
+        }
+
+        async function determineAvailableBus(from, to, date, count) {
+            const q = query(collection(db, "bookings"), 
+                where("from", "==", from), where("to", "==", to), where("date", "==", date));
+            const snap = await getDocs(q);
+            
+            let busLoads = {};
+            snap.forEach(doc => {
+                const b = doc.data().busNo;
+                busLoads[b] = (busLoads[b] || 0) + doc.data().passengers.length;
+            });
+
+            let index = 1;
+            while(true) {
+                let busID = `EXP-${from.slice(0,3).toUpperCase()}-${index}`;
+                if ((busLoads[busID] || 0) + count <= 24) return busID;
+                index++;
+            }
+        }
+
+        function generateTicketID() {
+
+    return 'BUS-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+
+}
+
+
+function renderTickets(booking) {
+
+    const container = document.getElementById('tickets-container');
+
+    container.innerHTML = '';
+
+    booking.passengers.forEach((p, index) => {
+
+        const ticketID = generateTicketID();
+
+        container.innerHTML += `
+
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
+
+            <div class="flex justify-between border-b pb-2 mb-2">
+
+                <span class="font-bold text-gray-900">
+                    ${booking.from} to ${booking.to}
+                </span>
+
+                <span class="text-xs font-mono bg-black text-white px-2 py-0.5 rounded">
+                    ${booking.busNo}
+                </span>
+
+            </div>
+
+            <div class="text-sm space-y-2">
+
+                <p>
+                    <strong>🎟 Ticket ID:</strong> ${ticketID}
+                </p>
+
+                <p>
+                    <strong>Passenger Number:</strong> ${index + 1}
+                </p>
+
+                <p>
+                    <strong>Name:</strong> ${p.name}
+                </p>
+
+                <p>
+                    <strong>Age:</strong> ${p.age}
+                </p>
+
+                <p>
+                    <strong>Gender:</strong> ${p.gender}
+                </p>
+
+                <p>
+                    <strong>Phone:</strong> ${p.phone}
+                </p>
+
+                <p>
+                    <strong>Date:</strong> ${booking.date}
+                </p>
+
+                <p>
+                    <strong>Arrival:</strong> 06:30 AM (Tentative)
+                </p>
+
+                <p>
+                    <strong>Total Fare:</strong> ₹${booking.totalCost}
+                </p>
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+        window.setupOptions = () => {
+            const selects = [document.getElementById('from-dest'), document.getElementById('to-dest')];
+            selects.forEach(s => {
+                s.innerHTML = '';
+                Object.keys(locationNetwork).forEach(city => {
+                    let opt = new Option(city, city);
+                    s.add(opt);
+                });
+            });
+            calculateFare();
+        };
+
+        window.navigateTo = (id) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        };
+
+        window.switchAuthTab = (type) => {
+            document.getElementById('login-form').classList.toggle('hidden', type !== 'login');
+            document.getElementById('signup-form').classList.toggle('hidden', type === 'login');
+            document.getElementById('tab-login').className = type === 'login' ? "w-1/2 py-2 bg-gray-900 text-white rounded-lg" : "w-1/2 py-2 text-gray-600";
+            document.getElementById('tab-signup').className = type === 'signup' ? "w-1/2 py-2 bg-gray-900 text-white rounded-lg" : "w-1/2 py-2 text-gray-600";
+        };
+
+        window.handleAuth = (e) => { e.preventDefault(); navigateTo('page2'); };
+        window.restartBooking = () => { navigateTo('page2'); };
+
+        setupOptions();
+    </script>
+</body>
+</html>
